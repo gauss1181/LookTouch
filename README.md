@@ -5,7 +5,7 @@ Build18 2015
 
 Wiki page: http://build18.ece.cmu.edu/wiki/index.php/LookTouch
 
-Blog: TBD
+Blog: https://build18looktouch.wordpress.com/
 
 LookTouch will use eye tracking combined with gesture controls to create a never-before-seen user interface as applied in a simple game environment.
 
