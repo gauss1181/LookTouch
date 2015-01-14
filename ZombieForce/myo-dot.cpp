@@ -13,6 +13,7 @@
 
 // include sdl file
 #include "26_motion/26_motion.cpp"
+#include "26_motion/zRect.cpp"
 
 // Classes that inherit from myo::DeviceListener can be used to receive events from Myo devices. DeviceListener
 // provides several virtual functions for handling different kinds of events. If you do not override an event, the
@@ -87,6 +88,8 @@ public:
             // are being performed, but lock after inactivity.
             myo->unlock(myo::Myo::unlockTimed);
         }
+        poseString = currentPose.toString();
+
     }
 
     // onArmSync() is called whenever Myo has recognized a Sync Gesture after someone has put it on their
@@ -119,7 +122,21 @@ public:
 
     // There are other virtual functions in DeviceListener that we could override here, like onAccelerometerData().
     // For this example, the functions overridden above are sufficient.
-
+    void onAccelerometerData (myo::Myo *myo, uint64_t timestamp, const myo::Vector3 < float > &accel){
+        //printf("\r%f %f %f %f", accel[0], accel[1], accel[2], accel[3]);
+        if (fabs(accel[0]) > 1.0) {
+            printf("\rBIG 0");
+        }
+        if (fabs(accel[1]) > 1.0) {
+            printf("\rBIG 1");
+        }
+        
+//        if (fabs(accel[2]) > 1.0) {
+//            printf("\rBIG 2");
+//        }
+    }
+    
+    
     // We define this function to print the current values that were updated by the on...() functions above.
     void print()
     {
@@ -141,7 +158,6 @@ public:
             // Pose::toString() provides the human-readable name of a pose. We can also output a Pose directly to an
             // output stream (e.g. std::cout << currentPose;). In this case we want to get the pose name's length so
             // that we can fill the rest of the field with spaces below, so we obtain it as a string using toString().
-            std::string poseString = currentPose.toString();
 
             std::cout << '[' << (isUnlocked ? "unlock" : "lock  ") << ']'
                       << '[' << (whichArm == myo::armLeft ? "L" : "R") << ']'
@@ -166,6 +182,7 @@ public:
     float roll_perc, pitch_perc, yaw_perc;
     float yaw_init = -1.0;
     myo::Pose currentPose;
+    std::string poseString;
 };
 
 int main(int argc, char** argv)
@@ -225,6 +242,7 @@ int main(int argc, char** argv)
             
             //The dot that will be moving around on the screen
             Dot dot;
+            ZRect zRect("red", 200, 200, dot.DOT_WIDTH, dot.DOT_HEIGHT);
             
             //While application is running
             while( !quit )
@@ -254,12 +272,14 @@ int main(int argc, char** argv)
                 //Move the dot
                 //dot.move();
                 dot.updateCoords(1-collector.yaw_perc, 1-collector.pitch_perc, 1-collector.yaw_init);
+                zRect.checkGrab(collector.poseString, dot.mPosX, dot.mPosY);
                 
                 //Clear screen
                 SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
                 SDL_RenderClear( gRenderer );
                 
                 //Render objects
+                zRect.render();
                 dot.render();
                 
                 //Update screen

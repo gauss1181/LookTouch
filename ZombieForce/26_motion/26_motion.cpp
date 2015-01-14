@@ -113,7 +113,6 @@ class Dot
 		//Shows the dot on the screen
 		void render();
 
-    private:
 		//The X and Y offsets of the dot
 		int mPosX, mPosY;
 
@@ -327,11 +326,17 @@ void Dot::handleEvent( SDL_Event& e )
     }
 }
 
+// TODO - fix negative wraparound
 void Dot::updateCoords(float xPerc, float yPerc, float initX)
 {
 	// scale yaw to nice X value from initial yaw position
 	float xScale = 10.0;
-	float tempX = fmod((xPerc - initX) * xScale + xScale/2, xScale) - (xScale/2 - 0.5);
+	float realDiff = fmod(xPerc - initX, 1.0);
+	if (realDiff > 0.5) {
+		realDiff = 1.0 - realDiff;
+	}
+	float tempX = fmod(realDiff * xScale + xScale/2, xScale) - (xScale/2 - 0.5);
+	//printf("\r%f", tempX);
 	if (tempX < 0.0) {
 		tempX = 0.0;
 	}
