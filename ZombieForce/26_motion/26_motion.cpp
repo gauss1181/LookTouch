@@ -108,7 +108,7 @@ class Dot
 
 		//Moves the dot
 		void move();
-		void updateCoords(float xPerc, float yPerc);
+		void updateCoords(float xPerc, float yPerc, float initX);
 
 		//Shows the dot on the screen
 		void render();
@@ -327,10 +327,29 @@ void Dot::handleEvent( SDL_Event& e )
     }
 }
 
-void Dot::updateCoords(float xPerc, float yPerc)
+void Dot::updateCoords(float xPerc, float yPerc, float initX)
 {
-	mPosX = xPerc * SCREEN_WIDTH;
-	mPosY = yPerc * SCREEN_HEIGHT;
+	// scale yaw to nice X value from initial yaw position
+	float xScale = 10.0;
+	float tempX = fmod((xPerc - initX) * xScale + xScale/2, xScale) - (xScale/2 - 0.5);
+	if (tempX < 0.0) {
+		tempX = 0.0;
+	}
+	else if (tempX > 0.95) {
+		tempX = 0.95;
+	}
+	mPosX = tempX * SCREEN_WIDTH;
+
+	// scale pitch to a nice Y value
+	float yScale = 8.0;
+	float tempY = (yPerc - (0.5 - (1/yScale)/2)) * yScale;
+	if (tempY < 0) {
+		tempY = 0;
+	}
+	else if (tempY > 0.95) {
+		tempY = 0.95;
+	}
+	mPosY = tempY * SCREEN_HEIGHT;
 }
 
 void Dot::move()

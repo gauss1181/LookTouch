@@ -62,6 +62,10 @@ public:
         roll_w = static_cast<int>((roll + (float)M_PI)/(M_PI * 2.0f) * 18);
         pitch_w = static_cast<int>((pitch + (float)M_PI/2.0f)/M_PI * 18);
         yaw_w = static_cast<int>((yaw + (float)M_PI)/(M_PI * 2.0f) * 18);
+        
+        if (yaw_init < 0) {
+            yaw_init = yaw_perc;
+        }
     }
 
     // onPose() is called whenever the Myo detects that the person wearing it has changed their pose, for example,
@@ -121,9 +125,10 @@ public:
     {
         // Clear the current line
         std::cout << '\r';
-
-        std::cout << roll_perc;
-        std::cout << ' ' << pitch_perc << ' ' << yaw_perc << ' ';
+        
+        std::cout << yaw_perc;
+        std::cout << ' ' << yaw_init << ' ';
+        //std::cout << ' ' << pitch_perc << ' ' << yaw_perc << ' ';
         
         // Print out the orientation. Orientation data is always available, even if no arm is currently recognized.
         std::cout << '[' << std::string(roll_w, '*') << std::string(18 - roll_w, ' ') << ']'
@@ -159,6 +164,7 @@ public:
     // These values are set by onOrientationData() and onPose() above.
     int roll_w, pitch_w, yaw_w;
     float roll_perc, pitch_perc, yaw_perc;
+    float yaw_init = -1.0;
     myo::Pose currentPose;
 };
 
@@ -247,7 +253,7 @@ int main(int argc, char** argv)
                 
                 //Move the dot
                 //dot.move();
-                dot.updateCoords(1-collector.yaw_perc, 1-collector.pitch_perc);
+                dot.updateCoords(1-collector.yaw_perc, 1-collector.pitch_perc, 1-collector.yaw_init);
                 
                 //Clear screen
                 SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
@@ -266,7 +272,7 @@ int main(int argc, char** argv)
     close();
         
     return 0;
-        
+
 
     // If a standard exception occurred, we print out its message and exit.
     } catch (const std::exception& e) {
