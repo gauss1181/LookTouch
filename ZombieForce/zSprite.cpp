@@ -6,12 +6,16 @@ and may not be redistributed without written permission.*/
 #include <SDL2_image/SDL_image.h>
 #include <stdio.h>
 #include <string>
+#include <stdlib.h>
+#include <random>
 
 //Screen dimension constants
 // const int SCREEN_WIDTH = 640;
 // const int SCREEN_HEIGHT = 480;
 
 const int WALKING_ANIMATION_FRAMES = 6;
+const int EXPL_ANIMATION_FRAMES = 4;
+const int TOTAL_ANIMATION_FRAMES = WALKING_ANIMATION_FRAMES + EXPL_ANIMATION_FRAMES;
 
 
 class ZSprite{
@@ -19,8 +23,11 @@ class ZSprite{
 	public:
 	//The window we'll be rendering to
 	SDL_Window* gWindow = NULL;
-	static const int rectW = 36;
-	static const int rectH = 56;
+	int origW = 36;
+	int origH = 56;
+	int rectW = 36;
+	int rectH = 56;
+	float curFactor = 1.0;
 	int rectX = 0;
 	int rectY = 0;
 	int dotXprev = 0;
@@ -29,6 +36,9 @@ class ZSprite{
 	int dotH = 20;
 	std::string lastPose = "";
 	bool grabbed = false;
+	bool destroyed = false;
+	int explodeFrames = -1;
+	int explodeFrameMax = 3;
 
 	//The window renderer
 	SDL_Renderer* gRenderer = NULL;
@@ -36,7 +46,7 @@ class ZSprite{
 	//Walking animation
 	int frame = 0;
 	int frameSlowdown = 8;
-	SDL_Rect gSpriteClips[ WALKING_ANIMATION_FRAMES ];
+	SDL_Rect gSpriteClips[ TOTAL_ANIMATION_FRAMES ];
 	LTexture gSpriteSheetTexture;
 
 	//Initializes the variables
@@ -47,9 +57,38 @@ class ZSprite{
 		dotH = initDotH;
 	};
 
+	void scale(float factorInc){
+		curFactor += factorInc;
+		if (rectH > SCREEN_HEIGHT) {
+			// TODO lose health?
+			return;
+		}
+		rectW = (int) origW*curFactor;
+		rectH = (int) origH*curFactor;
+		gSpriteSheetTexture.mWidth = rectW;
+		gSpriteSheetTexture.mHeight = rectH;
+	}
+
 	// updates zombie sprite to next frame when walking
 	void render(){
-		SDL_Rect* currentClip = &gSpriteClips[ frame / frameSlowdown ];
+		scale(0.02);
+
+		int curFrame = 0;
+		if (explodeFrames > -1) {
+			curFrame = WALKING_ANIMATION_FRAMES + explodeFrameMax - explodeFrames;
+			explodeFrames--;
+			if (explodeFrames == -1) {
+				frame = 0;
+				rectX = rand() % (SCREEN_WIDTH - rectW);
+				rectY = rand() % (SCREEN_HEIGHT - rectH);
+				scale(-0.5);
+			}
+		}
+		else {
+			curFrame = frame / frameSlowdown;
+		}
+
+		SDL_Rect* currentClip = &gSpriteClips[ curFrame ];
 		gSpriteSheetTexture.render( rectX, rectY, currentClip );
 
 		//Update screen
@@ -72,7 +111,7 @@ class ZSprite{
 		int rectB = rectY + rectH;
 		// they collide
 		if(rectR >= dotX && rectX <= dotR && rectB >= dotY && rectY <= dotB) {
-			printf("\rCOLLIDE");
+			//printf("\rCOLLIDE");
 			if (lastPose != curPose) {
 				if (lastPose == "fingersSpread") {
 					grabbed = false;
@@ -81,6 +120,9 @@ class ZSprite{
 				if (curPose == "fingersSpread") {
 					grabbed = true;
 					printf("\rfist inside");
+				}
+				if (curPose == "fist") {
+					explodeFrames = explodeFrameMax;
 				}
 				lastPose = curPose;
 			}
@@ -94,6 +136,19 @@ class ZSprite{
 		dotXprev = dotX;
 		dotYprev = dotY;
 	};
+
+	bool checkThrow(bool bigMoveHappened){
+		if (grabbed){
+			if (bigMoveHappened){
+				printf("BIG MOVE");
+				scale(-0.5);
+			}
+			return false;
+		}
+		else {
+			return bigMoveHappened;			
+		}
+	}
 
 	bool loadMedia(){
 		//Loading success flag
@@ -142,6 +197,33 @@ class ZSprite{
 			gSpriteClips[ 5 ].y = y1;
 			gSpriteClips[ 5 ].w = w;
 			gSpriteClips[ 5 ].h = h;
+
+			// explosion
+
+			int exX = 28;
+			int exY = 284;
+			int exW = 43;
+			int exH = 54;
+
+			gSpriteClips[ 6 ].x = 170;
+			gSpriteClips[ 6 ].y = 210;
+			gSpriteClips[ 6 ].w = exW;
+			gSpriteClips[ 6 ].h = exH;
+
+			gSpriteClips[ 7 ].x = exX;
+			gSpriteClips[ 7 ].y = exY;
+			gSpriteClips[ 7 ].w = exW;
+			gSpriteClips[ 7 ].h = exH;
+
+			gSpriteClips[ 8 ].x = exX + exW;
+			gSpriteClips[ 8 ].y = exY;
+			gSpriteClips[ 8 ].w = exW;
+			gSpriteClips[ 8 ].h = exH;
+
+			gSpriteClips[ 9 ].x = exX + 2*exW;
+			gSpriteClips[ 9 ].y = exY;
+			gSpriteClips[ 9 ].w = exW;
+			gSpriteClips[ 9 ].h = exH;
 		}
 
 		return success;

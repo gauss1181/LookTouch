@@ -21,6 +21,8 @@
 // default behavior is to do nothing.
 class DataCollector : public myo::DeviceListener {
 public:
+    bool bigMoveHappened = false;
+    
     DataCollector()
     : onArm(false), isUnlocked(false), roll_w(0), pitch_w(0), yaw_w(0), currentPose()
     {
@@ -118,17 +120,19 @@ public:
     // onLock() is called whenever Myo has become locked. No pose events will be sent until the Myo is unlocked again.
     void onLock(myo::Myo* myo, uint64_t timestamp)
     {
-        isUnlocked = false;
+//        myo::UnlockType r = myo::unlockTimed;
+//        myo->unlock(r);
     }
 
     // There are other virtual functions in DeviceListener that we could override here, like onAccelerometerData().
     // For this example, the functions overridden above are sufficient.
     void onAccelerometerData (myo::Myo *myo, uint64_t timestamp, const myo::Vector3 < float > &accel){
         //printf("\r%f %f %f %f", accel[0], accel[1], accel[2], accel[3]);
-        if (fabs(accel[0]) > 1.0) {
+        if (fabs(accel[0]) > 1.2) {
             printf("\rBIG 0");
+            bigMoveHappened = true;
         }
-        if (fabs(accel[1]) > 1.0) {
+        if (fabs(accel[1]) > 2.0) {
             printf("\rBIG 1");
         }
         
@@ -256,7 +260,7 @@ int main(int argc, char** argv)
                 hub.run(1000/20);
                 // After processing events, we call the print() member function we defined above to print out the values we've
                 // obtained from any events that have occurred.
-                collector.print();
+                //collector.print();
                 
                 
                 //Handle events on queue for dot
@@ -276,6 +280,7 @@ int main(int argc, char** argv)
                 //dot.move();
                 dot.updateCoords(1-collector.yaw_perc, 1-collector.pitch_perc, 1-collector.yaw_init);
                 zSprite.checkGrab(collector.poseString, dot.mPosX, dot.mPosY, myo);
+                collector.bigMoveHappened = zSprite.checkThrow(collector.bigMoveHappened);
                 
                 //Clear screen
                 SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );

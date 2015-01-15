@@ -8,8 +8,11 @@ and may not be redistributed without written permission.*/
 #include <string>
 
 //Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+// const int SCREEN_WIDTH = 640;
+// const int SCREEN_HEIGHT = 480;
+
+const int SCREEN_WIDTH = 1440;
+const int SCREEN_HEIGHT = 900;
 
 //Texture wrapper class
 class LTexture
@@ -48,13 +51,14 @@ class LTexture
 		int getWidth();
 		int getHeight();
 
+		//Image dimensions
+		int mWidth;
+		int mHeight;
+
 	private:
 		//The actual hardware texture
 		SDL_Texture* mTexture;
 
-		//Image dimensions
-		int mWidth;
-		int mHeight;
 };
 
 //The application time based timer
@@ -172,7 +176,7 @@ bool LTexture::loadFromFile( std::string path, int r=0, int g=0xFF, int b=0xFF )
 		SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, r, g, b ) );
 
 		//Create texture from surface pixels
-        newTexture = SDL_CreateTextureFromSurface( gRenderer, loadedSurface );
+    newTexture = SDL_CreateTextureFromSurface( gRenderer, loadedSurface );
 		if( newTexture == NULL )
 		{
 			printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
@@ -266,11 +270,11 @@ void LTexture::render( int x, int y, SDL_Rect* clip, double angle, SDL_Point* ce
 	SDL_Rect renderQuad = { x, y, mWidth, mHeight };
 
 	//Set clip rendering dimensions
-	if( clip != NULL )
-	{
-		renderQuad.w = clip->w;
-		renderQuad.h = clip->h;
-	}
+	// if( clip != NULL )
+	// {
+	// 	renderQuad.w = clip->w;
+	// 	renderQuad.h = clip->h;
+	// }
 
 	//Render to screen
 	SDL_RenderCopyEx( gRenderer, mTexture, clip, &renderQuad, angle, center, flip );
