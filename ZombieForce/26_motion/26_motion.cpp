@@ -22,7 +22,7 @@ class LTexture
 		~LTexture();
 
 		//Loads image at specified path
-		bool loadFromFile( std::string path );
+		bool loadFromFile( std::string path, int r, int g, int b );
 		
 		#ifdef _SDL_TTF_H
 		//Creates image from font string
@@ -152,7 +152,7 @@ LTexture::~LTexture()
 	free();
 }
 
-bool LTexture::loadFromFile( std::string path )
+bool LTexture::loadFromFile( std::string path, int r=0, int g=0xFF, int b=0xFF )
 {
 	//Get rid of preexisting texture
 	free();
@@ -169,7 +169,7 @@ bool LTexture::loadFromFile( std::string path )
 	else
 	{
 		//Color key image
-		SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, 0, 0xFF, 0xFF ) );
+		SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, r, g, b ) );
 
 		//Create texture from surface pixels
         newTexture = SDL_CreateTextureFromSurface( gRenderer, loadedSurface );

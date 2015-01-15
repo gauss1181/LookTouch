@@ -99,13 +99,15 @@ class ZSprite{
 		//Loading success flag
 		bool success = true;
 		//Load sprite sheet texture
-		if( !gSpriteSheetTexture.loadFromFile( "zombieSprites.png" ) )
+		if( !gSpriteSheetTexture.loadFromFile( "zombieSprites.png", 0xFF, 0x00, 0xFF ) )
 		{
 			printf( "Failed to load walking animation texture!\n" );
 			success = false;
 		}
 		else
 		{
+			// key out background green color
+
 			int x1 = 8;
 			int y1 = 82;
 			int w = rectW;
