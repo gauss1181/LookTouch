@@ -272,7 +272,7 @@ int main(int argc, char** argv)
                 //Move the dot
                 //dot.move();
                 dot.updateCoords(1-collector.yaw_perc, 1-collector.pitch_perc, 1-collector.yaw_init);
-                zRect.checkGrab(collector.poseString, dot.mPosX, dot.mPosY);
+                zRect.checkGrab(collector.poseString, dot.mPosX, dot.mPosY, myo);
                 
                 //Clear screen
                 SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
