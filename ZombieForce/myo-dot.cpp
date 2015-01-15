@@ -288,6 +288,7 @@ int main(int argc, char** argv)
                 
                 //Render objects
                 //zRect.render();
+                gForestTexture.render(0, 0);
                 dot.render();
                 zSprite.render();
                 

@@ -141,6 +141,7 @@ SDL_Renderer* gRenderer = NULL;
 
 //Scene textures
 LTexture gDotTexture;
+LTexture gForestTexture;
 
 LTexture::LTexture()
 {
@@ -456,6 +457,13 @@ bool loadMedia()
 		success = false;
 	}
 
+	//Load dot texture
+	if( !gForestTexture.loadFromFile( "forest.png" ) )
+	{
+		printf( "Failed to load forest texture!\n" );
+		success = false;
+	}
+
 	return success;
 }
 
@@ -463,6 +471,7 @@ void close()
 {
 	//Free loaded images
 	gDotTexture.free();
+	gForestTexture.free();
 
 	//Destroy window	
 	SDL_DestroyRenderer( gRenderer );
