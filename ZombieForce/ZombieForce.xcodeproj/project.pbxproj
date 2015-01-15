@@ -35,6 +35,7 @@
 		03E8DECD1A661AB5008993A4 /* SDL2_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_ttf.framework; path = ../../../../../../Library/Frameworks/SDL2_ttf.framework; sourceTree = "<group>"; };
 		03E8DECE1A661AB5008993A4 /* SDL2_mixer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_mixer.framework; path = ../../../../../../Library/Frameworks/SDL2_mixer.framework; sourceTree = "<group>"; };
 		03E8DECF1A661AB5008993A4 /* SDL2_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_image.framework; path = ../../../../../../Library/Frameworks/SDL2_image.framework; sourceTree = "<group>"; };
+		03E8DED51A674F4D008993A4 /* zombieSprites.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = zombieSprites.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +63,7 @@
 				03E8DECE1A661AB5008993A4 /* SDL2_mixer.framework */,
 				03E8DECF1A661AB5008993A4 /* SDL2_image.framework */,
 				03E8DEC91A661409008993A4 /* myo-dot.cpp */,
+				03E8DED51A674F4D008993A4 /* zombieSprites.png */,
 				03E8DE7C1A64ECE7008993A4 /* Products */,
 			);
 			sourceTree = "<group>";

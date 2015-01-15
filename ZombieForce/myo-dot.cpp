@@ -14,6 +14,7 @@
 // include sdl file
 #include "26_motion/26_motion.cpp"
 #include "26_motion/zRect.cpp"
+#include "zSprite.cpp"
 
 // Classes that inherit from myo::DeviceListener can be used to receive events from Myo devices. DeviceListener
 // provides several virtual functions for handling different kinds of events. If you do not override an event, the
@@ -242,7 +243,9 @@ int main(int argc, char** argv)
             
             //The dot that will be moving around on the screen
             Dot dot;
-            ZRect zRect("red", 200, 200, dot.DOT_WIDTH, dot.DOT_HEIGHT);
+            //ZRect zRect("red", 200, 200, dot.DOT_WIDTH, dot.DOT_HEIGHT);
+            ZSprite zSprite(200, 200, dot.DOT_WIDTH, dot.DOT_HEIGHT);
+            zSprite.loadMedia();
             
             //While application is running
             while( !quit )
@@ -272,15 +275,16 @@ int main(int argc, char** argv)
                 //Move the dot
                 //dot.move();
                 dot.updateCoords(1-collector.yaw_perc, 1-collector.pitch_perc, 1-collector.yaw_init);
-                zRect.checkGrab(collector.poseString, dot.mPosX, dot.mPosY, myo);
+                zSprite.checkGrab(collector.poseString, dot.mPosX, dot.mPosY, myo);
                 
                 //Clear screen
                 SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
                 SDL_RenderClear( gRenderer );
                 
                 //Render objects
-                zRect.render();
+                //zRect.render();
                 dot.render();
+                zSprite.render();
                 
                 //Update screen
                 SDL_RenderPresent( gRenderer );
