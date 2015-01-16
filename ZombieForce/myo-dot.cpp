@@ -129,6 +129,7 @@ public:
     {
 //        myo::UnlockType r = myo::unlockTimed;
 //        myo->unlock(r);
+        myo->unlock(myo::Myo::unlockTimed);
     }
 
     // There are other virtual functions in DeviceListener that we could override here, like onAccelerometerData().
@@ -136,11 +137,9 @@ public:
     void onAccelerometerData (myo::Myo *myo, uint64_t timestamp, const myo::Vector3 < float > &accel){
         //printf("\r%f %f %f %f", accel[0], accel[1], accel[2], accel[3]);
         if (fabs(accel[0]) > 1.2) {
-            printf("\rBIG 0");
             bigMoveHappened = true;
         }
         if (fabs(accel[1]) > 2.0) {
-            printf("\rBIG 1");
         }
         
 //        if (fabs(accel[2]) > 1.0) {
@@ -213,6 +212,7 @@ int main(int argc, char** argv)
     // waitForMyo() takes a timeout value in milliseconds. In this case we will try to find a Myo for 10 seconds, and
     // if that fails, the function will return a null pointer.
     myo::Myo* myo = hub.waitForMyo(10000);
+    hub.setLockingPolicy(myo::Hub::lockingPolicyNone);
 
     // If waitForMyo() returned a null pointer, we failed to find a Myo, so exit with an error message.
     if (!myo) {

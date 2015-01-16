@@ -123,20 +123,19 @@ class ZSprite{
 		bool gotZombie = false;
 		// they collide
 		if(rectR >= dotX && rectX <= dotR && rectB >= dotY && rectY <= dotB) {
-			//printf("\rCOLLIDE");
 			if (lastPose != curPose) {
-				if (lastPose == "fingersSpread") {
-					grabbed = false;
-					printf("\rlet go");
-				}
-				if (curPose == "fingersSpread") {
-					grabbed = true;
-					printf("\rfist inside");
-				}
-				if (curPose == "fist") {
+				// if (lastPose == "fingersSpread") {
+				// 	grabbed = false;
+				// }
+				// if (curPose == "fingersSpread") {
+				// 	grabbed = true;
+				// }
+				if (curPose == "fist" || curPose == "waveIn" || 
+						curPose == "waveIn" || curPose == "doubleTap") {
 					Mix_PlayChannel( -1, gSplode, 0 );
 					explodeFrames = explodeFrameMax;
 					gotZombie = true;
+					myo->vibrate(myo::Myo::vibrationShort);
 				}
 				lastPose = curPose;
 			}
@@ -155,7 +154,6 @@ class ZSprite{
 	bool checkThrow(bool bigMoveHappened){
 		if (grabbed){
 			if (bigMoveHappened){
-				printf("BIG MOVE");
 				scale(-scaleDecr);
 			}
 			return false;
