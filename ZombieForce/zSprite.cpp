@@ -39,6 +39,9 @@ class ZSprite{
 	bool destroyed = false;
 	int explodeFrames = -1;
 	int explodeFrameMax = 3;
+	double endSize = 0.4;
+	double preEndSize = endSize - 0.05;
+	double scaleDecr = 1.3;
 
 	//The window renderer
 	SDL_Renderer* gRenderer = NULL;
@@ -50,15 +53,16 @@ class ZSprite{
 	LTexture gSpriteSheetTexture;
 
 	//Initializes the variables
-	ZSprite(int initX, int initY, int initDotW, int initDotH){
-		rectX = initX;
-		rectY = initY;
+	void initZSprite(int initDotW, int initDotH){
+		rectX = rand() % (SCREEN_WIDTH - rectW);
+		rectY = rand() % (SCREEN_HEIGHT - rectH);
 		dotW = initDotW;
 		dotH = initDotH;
 	};
 
 	void scale(float factorInc){
 		curFactor += factorInc;
+		printf("%f ", curFactor);
 		if (rectH > SCREEN_HEIGHT) {
 			// TODO lose health?
 			return;
@@ -70,7 +74,11 @@ class ZSprite{
 	}
 
 	// updates zombie sprite to next frame when walking
-	void render(){
+	int render(){
+		if (rectH > SCREEN_HEIGHT*endSize) {
+			return 2;
+		}
+
 		scale(0.02);
 
 		int curFrame = 0;
@@ -81,7 +89,7 @@ class ZSprite{
 				frame = 0;
 				rectX = rand() % (SCREEN_WIDTH - rectW);
 				rectY = rand() % (SCREEN_HEIGHT - rectH);
-				scale(-0.5);
+				scale(-scaleDecr);
 			}
 		}
 		else {
@@ -102,13 +110,17 @@ class ZSprite{
 		{
 			frame = 0;
 		}
+
+		if (rectH > SCREEN_HEIGHT*preEndSize) return 1;
+		else return 0;
 	}
 
-	void checkGrab(std::string curPose, int dotX, int dotY, myo::Myo* myo){
+	bool checkGrab(std::string curPose, int dotX, int dotY, myo::Myo* myo){
 		int dotR = dotX + dotW;
 		int dotB = dotY + dotH;
 		int rectR = rectX + rectW;
 		int rectB = rectY + rectH;
+		bool gotZombie = false;
 		// they collide
 		if(rectR >= dotX && rectX <= dotR && rectB >= dotY && rectY <= dotB) {
 			//printf("\rCOLLIDE");
@@ -122,7 +134,9 @@ class ZSprite{
 					printf("\rfist inside");
 				}
 				if (curPose == "fist") {
+					Mix_PlayChannel( -1, gSplode, 0 );
 					explodeFrames = explodeFrameMax;
+					gotZombie = true;
 				}
 				lastPose = curPose;
 			}
@@ -135,13 +149,14 @@ class ZSprite{
 		}
 		dotXprev = dotX;
 		dotYprev = dotY;
+		return gotZombie;
 	};
 
 	bool checkThrow(bool bigMoveHappened){
 		if (grabbed){
 			if (bigMoveHappened){
 				printf("BIG MOVE");
-				scale(-0.5);
+				scale(-scaleDecr);
 			}
 			return false;
 		}

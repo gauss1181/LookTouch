@@ -142,12 +142,17 @@ SDL_Renderer* gRenderer = NULL;
 //Scene textures
 LTexture gDotTexture;
 LTexture gForestTexture;
+LTexture gRedForestTexture;
 
 //Globally used font
 TTF_Font *gFont = NULL;
 
 //Rendered texture
 LTexture gTextTexture;
+
+//The music that will be played
+Mix_Music *gMusic = NULL;
+Mix_Chunk *gSplode = NULL;
 
 LTexture::LTexture()
 {
@@ -451,6 +456,13 @@ bool init()
 					printf( "SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError() );
 					success = false;
 				}
+
+				//Initialize SDL_mixer
+				if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
+				{
+					printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
+					success = false;
+				}
 			}
 		}
 	}
@@ -477,6 +489,13 @@ bool loadMedia()
 		success = false;
 	}
 
+	//Load dot texture
+	if( !gRedForestTexture.loadFromFile( "redForest.png" ) )
+	{
+		printf( "Failed to load forest texture!\n" );
+		success = false;
+	}
+
 	//Open the font
 	gFont = TTF_OpenFont( "Arial Bold.ttf", 28 );
 	if( gFont == NULL )
@@ -494,6 +513,24 @@ bool loadMedia()
 			success = false;
 		}
 	}
+
+	//Load music
+	gMusic = Mix_LoadMUS( "chase_music.wav" );
+	if( gMusic == NULL )
+	{
+		printf( "Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError() );
+		success = false;
+	}
+
+	//Load sound effects
+	gSplode = Mix_LoadWAV( "musket.wav" );
+	if( gSplode == NULL )
+	{
+		printf( "Failed to load scratch sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
+		success = false;
+	}
+
+	Mix_PlayMusic( gMusic, -1 );
 
 	return success;
 }

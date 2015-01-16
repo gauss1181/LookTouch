@@ -10,8 +10,10 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <SDL2_ttf/SDL_ttf.h>
+#include <SDL2_mixer/SDL_mixer.h>
 #include <time.h>
 #include <string.h>
+#include <random>
 
 // The only file that needs to be included to use the Myo C++ SDK is myo.hpp.
 #include <myo/myo.hpp>
@@ -251,8 +253,11 @@ int main(int argc, char** argv)
             int curTime;
             char curTimeStr[30];
             char timeStr[30];
+            bool gameOver = false;
             time(&start);
-            
+            int gameStateNum = 0; // 0 - normal, 1 - close to dying, 2 - game over
+            int tempGameStateNum;
+            int zomTimes[10] = {0,5,8,14,23,31,43,51,61,79};
             
             //Event handler
             SDL_Event e;
@@ -260,10 +265,17 @@ int main(int argc, char** argv)
             //The dot that will be moving around on the screen
             Dot dot;
             //ZRect zRect("red", 200, 200, dot.DOT_WIDTH, dot.DOT_HEIGHT);
-            ZSprite zSprite(200, 200, dot.DOT_WIDTH, dot.DOT_HEIGHT);
-            ZSprite zSprite2(300, 100, dot.DOT_WIDTH, dot.DOT_HEIGHT);
-            zSprite.loadMedia();
-            zSprite2.loadMedia();
+            //ZSprite zSprite(200, 200, dot.DOT_WIDTH, dot.DOT_HEIGHT);
+            //ZSprite zSprite2(300, 100, dot.DOT_WIDTH, dot.DOT_HEIGHT);
+            ZSprite zombies[10];
+            int numZoms = 10;
+            
+            for (int i = 0; i < numZoms; i++) {
+                zombies[i].loadMedia();
+                zombies[i].initZSprite(dot.DOT_WIDTH, dot.DOT_HEIGHT);
+            }
+            
+            numZoms = 1;
             
             //While application is running
             while( !quit )
@@ -295,29 +307,58 @@ int main(int argc, char** argv)
                 //Move the dot
                 //dot.move();
                 dot.updateCoords(1-collector.yaw_perc, 1-collector.pitch_perc, 1-collector.yaw_init);
-                zSprite.checkGrab(collector.poseString, dot.mPosX, dot.mPosY, myo);
-                zSprite2.checkGrab(collector.poseString, dot.mPosX, dot.mPosY, myo);
-                collector.bigMoveHappened = zSprite.checkThrow(collector.bigMoveHappened);
-                
+                for (int i = 0; i < numZoms; i++) {
+                    zombies[i].checkGrab(collector.poseString, dot.mPosX, dot.mPosY, myo);
+                    collector.bigMoveHappened = collector.bigMoveHappened || zombies[i].checkThrow(collector.bigMoveHappened);
+                }
+
                 //Clear screen
                 SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
                 SDL_RenderClear( gRenderer );
                 
                 //Render objects
-                //zRect.render();
-                gForestTexture.render(0, 0);
-                zSprite.render();
-                zSprite2.render();
+                if (gameStateNum != 1) gForestTexture.render(0, 0);
+                else gRedForestTexture.render(0, 0);
+
+                gameStateNum = 0;  // assume we're good
+                for (int i = 0; i < numZoms; i++) {
+                    if (!gameOver) {
+                        tempGameStateNum = zombies[i].render();
+                        if (tempGameStateNum == 2) {
+                            gameOver = true;
+                        }
+                        else if (!gameOver and tempGameStateNum == 1) {
+                            gameStateNum = 1;
+                        }
+                    }
+                }
                 dot.render();
                 
-                // put time on screen
+                // prep time for screen
                 SDL_Color textColor = { 0xFF, 0xFF, 0xFF };
-                curTime = (int)dif;
-                strcpy(curTimeStr, std::to_string(curTime).c_str());
-                strcpy(timeStr, "Time: ");
-                strcat(timeStr, curTimeStr);
-                gTextTexture.loadFromRenderedText( timeStr, textColor );
-                gTextTexture.render( ( SCREEN_WIDTH - gTextTexture.getWidth() - 40 ), ( 20 ) );
+                
+                if (gameOver) {
+                    strcpy(timeStr, "GAME OVER - ");
+                    strcat(timeStr, "Final Time: ");
+                    strcat(timeStr, curTimeStr);
+                    gTextTexture.loadFromRenderedText( timeStr, textColor );
+                    gTextTexture.render( ( SCREEN_WIDTH/2 - gTextTexture.getWidth() / 2 ), ( SCREEN_HEIGHT/2 - gTextTexture.getHeight()/2 ) );
+                }
+                else {
+                    curTime = (int)dif;
+                    // based on curTime, increase zombie number
+                    for (int i = 0; i < 10; i++) {
+                        if (zomTimes[i] >= curTime) {
+                            numZoms = i;
+                            break;
+                        }
+                    }
+                    strcpy(curTimeStr, std::to_string(curTime).c_str());
+                    strcpy(timeStr, "Time: ");
+                    strcat(timeStr, curTimeStr);
+                    gTextTexture.loadFromRenderedText( timeStr, textColor );
+                    gTextTexture.render( ( SCREEN_WIDTH - gTextTexture.getWidth() - 40 ), ( 20 ) );
+                }
                 
                 //Update screen
                 SDL_RenderPresent( gRenderer );
