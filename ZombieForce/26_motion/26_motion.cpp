@@ -143,6 +143,12 @@ SDL_Renderer* gRenderer = NULL;
 LTexture gDotTexture;
 LTexture gForestTexture;
 
+//Globally used font
+TTF_Font *gFont = NULL;
+
+//Rendered texture
+LTexture gTextTexture;
+
 LTexture::LTexture()
 {
 	//Initialize
@@ -438,6 +444,13 @@ bool init()
 					printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
 					success = false;
 				}
+
+				//Initialize SDL_ttf
+				if( TTF_Init() == -1 )
+				{
+					printf( "SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError() );
+					success = false;
+				}
 			}
 		}
 	}
@@ -451,7 +464,7 @@ bool loadMedia()
 	bool success = true;
 
 	//Load dot texture
-	if( !gDotTexture.loadFromFile( "26_motion/dot.bmp" ) )
+	if( !gDotTexture.loadFromFile( "26_motion/dot.png", 0xFF, 0x00, 0xFF ) )
 	{
 		printf( "Failed to load dot texture!\n" );
 		success = false;
@@ -462,6 +475,24 @@ bool loadMedia()
 	{
 		printf( "Failed to load forest texture!\n" );
 		success = false;
+	}
+
+	//Open the font
+	gFont = TTF_OpenFont( "Arial Bold.ttf", 28 );
+	if( gFont == NULL )
+	{
+		printf( "Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError() );
+		success = false;
+	}
+	else
+	{
+		//Render text
+		SDL_Color textColor = { 0xFF, 0xFF, 0xFF };
+		if( !gTextTexture.loadFromRenderedText( "The quick brown fox jumps over the lazy dog", textColor ) )
+		{
+			printf( "Failed to render text texture!\n" );
+			success = false;
+		}
 	}
 
 	return success;

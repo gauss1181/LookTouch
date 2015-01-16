@@ -6,7 +6,12 @@
 #include <iomanip>
 #include <stdexcept>
 #include <string>
+#include <stdio.h>
+#include <stdlib.h>
 #include <algorithm>
+#include <SDL2_ttf/SDL_ttf.h>
+#include <time.h>
+#include <string.h>
 
 // The only file that needs to be included to use the Myo C++ SDK is myo.hpp.
 #include <myo/myo.hpp>
@@ -241,6 +246,13 @@ int main(int argc, char** argv)
         {
             //Main loop flag
             bool quit = false;
+            time_t start,end;
+            double dif;
+            int curTime;
+            char curTimeStr[30];
+            char timeStr[30];
+            time(&start);
+            
             
             //Event handler
             SDL_Event e;
@@ -249,11 +261,15 @@ int main(int argc, char** argv)
             Dot dot;
             //ZRect zRect("red", 200, 200, dot.DOT_WIDTH, dot.DOT_HEIGHT);
             ZSprite zSprite(200, 200, dot.DOT_WIDTH, dot.DOT_HEIGHT);
+            ZSprite zSprite2(300, 100, dot.DOT_WIDTH, dot.DOT_HEIGHT);
             zSprite.loadMedia();
+            zSprite2.loadMedia();
             
             //While application is running
             while( !quit )
             {
+                time(&end);
+                dif = difftime(end, start);
                 
                 // In each iteration of our main loop, we run the Myo event loop for a set number of milliseconds.
                 // In this case, we wish to update our display 20 times a second, so we run for 1000/20 milliseconds.
@@ -280,6 +296,7 @@ int main(int argc, char** argv)
                 //dot.move();
                 dot.updateCoords(1-collector.yaw_perc, 1-collector.pitch_perc, 1-collector.yaw_init);
                 zSprite.checkGrab(collector.poseString, dot.mPosX, dot.mPosY, myo);
+                zSprite2.checkGrab(collector.poseString, dot.mPosX, dot.mPosY, myo);
                 collector.bigMoveHappened = zSprite.checkThrow(collector.bigMoveHappened);
                 
                 //Clear screen
@@ -289,8 +306,18 @@ int main(int argc, char** argv)
                 //Render objects
                 //zRect.render();
                 gForestTexture.render(0, 0);
-                dot.render();
                 zSprite.render();
+                zSprite2.render();
+                dot.render();
+                
+                // put time on screen
+                SDL_Color textColor = { 0xFF, 0xFF, 0xFF };
+                curTime = (int)dif;
+                strcpy(curTimeStr, std::to_string(curTime).c_str());
+                strcpy(timeStr, "Time: ");
+                strcat(timeStr, curTimeStr);
+                gTextTexture.loadFromRenderedText( timeStr, textColor );
+                gTextTexture.render( ( SCREEN_WIDTH - gTextTexture.getWidth() - 40 ), ( 20 ) );
                 
                 //Update screen
                 SDL_RenderPresent( gRenderer );
